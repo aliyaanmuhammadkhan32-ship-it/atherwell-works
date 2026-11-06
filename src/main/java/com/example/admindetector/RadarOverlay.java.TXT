@@ -1,0 +1,52 @@
+package com.example.admindetector;
+
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.math.MathHelper;
+
+public class RadarOverlay {
+    private static final MinecraftClient mc = MinecraftClient.getInstance();
+
+    public static void render(DrawContext context, float tickDelta) {
+        if (mc.world == null || mc.player == null) return;
+
+        int centerX = DraggableRadarScreen.radarX;
+        int centerY = DraggableRadarScreen.radarY;
+        int radius = DraggableRadarScreen.RADAR_RADIUS;
+
+        // 1. Draw Background Radar Disk (Translucent Black Circle)
+        context.fill(centerX - radius, centerY - radius, centerX + radius, centerY + radius, 0xAA000000);
+        
+        // 2. Draw Center Point (You / Blue dot)
+        context.fill(centerX - 1, centerY - 1, centerX + 1, centerY + 1, 0xFF0000FF);
+
+        // 3. Map Nearby Admins onto the Radar Screen
+        float playerYaw = mc.player.getYaw(); // Get direction player is facing
+
+        for (PlayerEntity admin : DetectorModule.trackedAdmins) {
+            // Get relative distance
+            double deltaX = admin.getX() - mc.player.getX();
+            double deltaZ = admin.getZ() - mc.player.getZ();
+
+            // Translate 3D block space positions taking player camera rotation into account
+            float angle = (float) Math.toRadians(playerYaw);
+            float cos = MathHelper.cos(angle);
+            float sin = MathHelper.sin(angle);
+
+            double rotatedX = deltaX * cos + deltaZ * sin;
+            double rotatedZ = deltaZ * cos - deltaX * sin;
+
+            // Scale factor: 1 block distance = 0.5 radar pixel spacing
+            int dotX = centerX + (int) (rotatedX * 0.5);
+            int dotY = centerY + (int) (rotatedZ * 0.5);
+
+            // Keep the dot inside the radar map boundary
+            int distFromCenter = (int) Math.sqrt(Math.pow(dotX - centerX, 2) + Math.pow(dotY - centerY, 2));
+            if (distFromCenter < radius - 2) {
+                // Draw Operator Dot (Bright Crimson Red)
+                context.fill(dotX - 2, dotY - 2, dotX + 2, dotY + 2, 0xFFFF0000);
+            }
+        }
+    }
+}

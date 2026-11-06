@@ -1,0 +1,21 @@
+package com.example.admindetector;
+
+import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
+
+public class AdminDetectorMod implements ClientModInitializer {
+    
+    @Override
+    public void onInitializeClient() {
+        // This tells Minecraft to run your Admin Scanner on every single game tick
+        ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            DetectorModule.onTick();
+        });
+
+        // This tells Minecraft to draw your custom Radar Screen on the player HUD
+        HudRenderCallback.EVENT.register((drawContext, tickDelta) -> {
+            RadarOverlay.render(drawContext, tickDelta);
+        });
+    }
+}

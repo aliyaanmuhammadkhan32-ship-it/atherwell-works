@@ -1,0 +1,43 @@
+package com.example.admindetector;
+
+public class DraggableRadarScreen {
+    // These hold the saved screen position of your radar window
+    public static int radarX = 50; 
+    public static int radarY = 50;
+    public static final int RADAR_RADIUS = 40;
+
+    private static boolean isDragging = false;
+    private static int dragStartX = 0;
+    private static int dragStartY = 0;
+
+    // Call this inside your mouseClicked event/mixin
+    public static boolean handleMouseClicked(double mouseX, double mouseY, int button) {
+        if (button == 0) { // Left click
+            // Check if mouse is clicking inside the radar boundary box
+            if (mouseX >= radarX - RADAR_RADIUS && mouseX <= radarX + RADAR_RADIUS &&
+                mouseY >= radarY - RADAR_RADIUS && mouseY <= radarY + RADAR_RADIUS) {
+                
+                isDragging = true;
+                dragStartX = (int) mouseX - radarX;
+                dragStartY = (int) mouseY - radarY;
+                return true; // Click consumed
+            }
+        }
+        return false;
+    }
+
+    // Call this inside your mouseDragged event/mixin
+    public static void handleMouseDragged(double mouseX, double mouseY, int button) {
+        if (isDragging && button == 0) {
+            radarX = (int) mouseX - dragStartX;
+            radarY = (int) mouseY - dragStartY;
+        }
+    }
+
+    // Call this inside your mouseReleased event/mixin
+    public static void handleMouseReleased(double mouseX, double mouseY, int button) {
+        if (button == 0) {
+            isDragging = false;
+        }
+    }
+}

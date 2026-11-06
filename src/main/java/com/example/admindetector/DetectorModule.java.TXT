@@ -1,0 +1,61 @@
+package com.example.admindetector;
+
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.entity.player.PlayerEntity;
+import java.util.ArrayList;
+import java.util.List;
+
+public class DetectorModule {
+    private static final MinecraftClient mc = MinecraftClient.getInstance();
+    public static boolean adminDetected = false;
+    public static List<PlayerEntity> trackedAdmins = new ArrayList<>();
+
+    // Keywords commonly found in staff names/prefixes
+    private static final String[] STAFF_KEYWORDS = {"admin", "mod", "owner", "staff", "helper"};
+
+    public static void onTick() {
+        if (mc.world == null || mc.player == null) return;
+
+        trackedAdmins.clear();
+        boolean foundAdminThisTick = false;
+
+        for (PlayerEntity player : mc.world.getPlayers()) {
+            if (player == mc.player) continue; // Ignore yourself
+
+            if (isOperator(player)) {
+                trackedAdmins.add(player);
+                foundAdminThisTick = true;
+            }
+        }
+
+        // KILL-SWITCH TRIGGER: Triggered the exact moment an admin enters the area
+        if (foundAdminThisTick && !adminDetected) {
+            adminDetected = true;
+            triggerEmergencyKillSwitch();
+        } else if (!foundAdminThisTick && adminDetected) {
+            adminDetected = false; // Safe again
+        }
+    }
+
+    private static boolean isOperator(PlayerEntity player) {
+        // Condition A: Player is in Spectator mode (Common for invisible inspecting staff)
+        if (player.isSpectator()) return true;
+
+        // Condition B: Name check
+        String name = player.getEntityName().toLowerCase();
+        for (String keyword : STAFF_KEYWORDS) {
+            if (name.contains(keyword)) return true;
+        }
+
+        return false;
+    }
+
+    private static void triggerEmergencyKillSwitch() {
+        // Log to game chat (client-side only so server doesn't see it)
+        if (mc.player != null) {
+            mc.player.sendMessage(net.minecraft.text.Text.of("§c[!] ADMIN DETECTED. DISABLING ALL CHEATS IMMEDIATELY!§r"), false);
+        }
+        
+        // This stops your cheat mods instantly. Add your specific cheat-disable commands here!
+    }
+}
