@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "id": "admindetector",
+  "version": "1.0.0",
+  "name": "Admin Detector Mod",
+  "description": "A tactical client utility with a draggable radar overlay that tracks server operator entities.",
+  "authors": [
+    "aliyaanmuhammadkhan32"
+  ],
+  "contact": {},
+  "license": "MIT",
+  "icon": "assets/admindetector/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "com.example.admindetector.AdminDetectorMod"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.16.5",
+    "minecraft": "~1.21.1",
+    "fabric-api": "*"
+  }
+}
